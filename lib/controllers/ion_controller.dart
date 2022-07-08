@@ -23,7 +23,7 @@ class IonController extends GetxController {
   Connector? _connector;
 
   RTC? _rtc;
-  var dataChannel_stick;
+  late RTCDataChannel dataChannel_stick;
   String get sid => _sid;
 
   String get uid => _uid;
@@ -84,28 +84,32 @@ class IonController extends GetxController {
   }
 
   connect() async {
-
     await _rtc!.connect();
     print('IonController connect()');
-
     joinRTC();
-
     print('joinRtc()');
   }
 
   dataChannelSend(String msg){
-    if(dataChannel_stick.state == RTCDataChannelState.RTCDataChannelOpen) {
+    //if(dataChannel_stick.state == RTCDataChannelState.RTCDataChannelOpen) {
       dataChannel_stick.send(RTCDataChannelMessage(msg));
-    }else
-      print("dataChannelSend fail,state:${dataChannel_stick.state}");
+    //}else
+      //print("dataChannelSend fail,state:${dataChannel_stick.state}");
   }
+
   joinRTC() async {
     _uid=await getPhoneIdentifer();
    await _rtc!.join(_sid, _uid, JoinConfig());
      dataChannel_stick =await _rtc!.createDataChannel("stick");
+     print("dataChannel_stick:${dataChannel_stick}");
+    dataChannel_stick.onMessage=(RTCDataChannelMessage data) =>{
+      print("RTCDataChannelMessage data:${data}")
+    };
      dataChannel_stick.onDataChannelState=( RTCDataChannelState state) =>{
-             if(state == RTCDataChannelState.RTCDataChannelOpen)
-                 dataChannel_stick.send(RTCDataChannelMessage("wuayxiongnnnnb"))
+       print("dataChannel_stick.onDataChannelState:${state}")
+             // if(state == RTCDataChannelState.RTCDataChannelOpen) {
+             //   dataChannel_stick.send(RTCDataChannelMessage("wuayxiongnnnnb"))
+             // }
      };
   }
 
